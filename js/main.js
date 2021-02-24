@@ -153,8 +153,8 @@ function sum(...numbers) {
 
 // ---------- Spread operator ----------
 
-let parts = ['shoulder', 'knees'];
-let lyrics = ['head', ...parts, 'and', 'toes'];
+const parts = ['shoulder', 'knees'];
+const lyrics = ['head', ...parts, 'and', 'toes'];
 
 //console.log(lyrics); // ['head', 'shoulder', 'knees', 'and', 'toes']
 
@@ -182,5 +182,77 @@ let { a4, b4, ...rest4 } = { b4: 10, a4: 20, d4: 30, c4: 40 };
 //console.log(b4); // 20
 //console.log(rest4.d4); // {d4: 30, c4: 40}
 
-let o1 = { g: 10, h: 20 };
-let o2 = {...o1, i: 30, j: 40, k: 50 };
+const o1 = { g: 10, h: 20 };
+const o2 = {...o1, i: 30, j: 40, k: 50 };
+
+// ---------- Array helpers ----------
+
+const numbers = [ 2, 8, 13 ];
+
+// Crear un array de números que sean el cuadrado de los números de otro array
+
+//const squares = numbers.map((number) => { return number * number });
+const squares = numbers.map(number => number * number);
+
+// [ 4, 64, 169 ]
+
+const squaresObject = numbers.map(number => { return { n: number } });
+/*
+[
+  {
+    n: 2
+  },
+  {
+    n: 8
+  },
+  {
+    n: 13
+  }
+]
+*/
+
+// Array cuyo numero es la suma del mismo y el siguiente
+// (excepto el último que será el primero)
+
+const squaresCrazy = numbers.map((number, index, array) => {
+  if(index < array.length-1) {
+    return number + array[index+1];
+  }
+  else {
+    return number + array[0];
+  }
+});
+
+const squaresCrazy = numbers.map((number, index, array) =>
+  index < array.length - 1 ? number + array[index + 1] : number + array[0]
+);
+
+// [ 2, 8, 13 ]
+
+// Nuevo array cuyos valores sean solo los pares de otro array
+const numbersEven = numbers.filter(number => number % 2 == 0);
+
+console.log(numbersEven); // [ 2, 8 ]
+
+// [ 2, 8, 13 ]
+
+// Sumatorio de un array
+const totalSum = numbers.reduce((sum, number) => sum + number);
+// totalSum: 23
+
+// Sumatorio de un array
+const totalSumSinPasarse = numbers.reduce((sum, number) => {
+  if(sum < 10) {
+    return sum + number;
+  } else {
+    return sum;
+  }
+});
+
+// Total de los cuadrados de los números pares de un array
+const numbers3 = [2, 8, 13];
+
+console.log(`El total es... ${numbers3
+  .map(number => number * number) // Los elevo al cuadrado
+  .filter(number => number % 2 == 0) // Filtro los (im)pares
+  .reduce((sum, number) => sum + number)} pesetas`); // Los sumo
