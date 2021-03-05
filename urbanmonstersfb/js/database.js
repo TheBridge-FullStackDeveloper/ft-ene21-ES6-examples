@@ -10,32 +10,41 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-let siguiente = 0;
+let next = 0;
 
 // Actualizar el valor del mensaje siguiente
 firebase
   .database()
   .ref('messages')
   .on('value', response =>
-    siguiente = response.val().length
+    next = response.val().length
 );
 
 function readMessages() {
-
+  
   // Acceder a la BD
   const database = firebase.database();
-
+  
   // Pedir datos
   const messagesRef = database.ref('messages');
-
+  
   messagesRef.on('value', (response) => {
     const data = response.val();
-
+    
     // Pintar datos
     document
       .querySelector("#messagesBox")
       .textContent = data.map((item) =>
-        `${item.timestamp}: ${item.text}, `);
+      `${item.timestamp}: ${item.text}, `);
+  });
+}
+
+function writeMessage(message) {
+
+  // Meter nuevo mensaje
+  database.ref('messages/' + ultimo).update({
+    timestamp: new Date.now(),
+    text: message
   });
 }
 
