@@ -8,46 +8,104 @@ const firebaseConfig = {
   appId: "1:316615256952:web:7b3cc829cad09b9958f68d",
 };
 
-firebase.initializeApp(firebaseConfig);
-
+// Global variables
 let next = 0;
+let database;
+let messagesRef;
+let provider;
+let auth;
+let logged = false;
 
-// Actualizar el valor del mensaje siguiente
-firebase
-  .database()
-  .ref('messages')
-  .on('value', response =>
-    next = response.val().length
-);
-
-function readMessages() {
-  
+async function init() {
   // Acceder a la BD
-  const database = firebase.database();
-  
-  // Pedir datos
-  const messagesRef = database.ref('messages');
-  
-  messagesRef.on('value', (response) => {
+  await firebase.initializeApp(firebaseConfig);
+
+  database = firebase.database();
+  messagesRef = database.ref('messages');
+
+  // Cuando cambien los datos (o en la primera carga)
+  await messagesRef.on('value', response => {
+
     const data = response.val();
     
+    // Actualizar el valor del mensaje siguiente
+    next = data.length;
+
     // Pintar datos
     document
       .querySelector("#messagesBox")
-      .textContent = data.map((item) =>
-      `${item.timestamp}: ${item.text}, `);
+      .textContent = data.map(item =>
+        `${item.timestamp}: ${item.text}, `);
   });
+
+  // Mostrar la parte privada (o no)
+  await firebase.auth().onAuthStateChanged(user => {
+    if (user) {
+      logged = true;
+
+      document.querySelector("#writeMessagesBox").style.display = "block";
+      document.querySelector("#loginBtn").style.display = "none";
+      document.querySelector("#logoutBtn").style.display = "block";
+    } else {
+      logged = false;
+
+      document.querySelector("#writeMessagesBox").style.display = "none";
+      document.querySelector("#loginBtn").style.display = "block";
+      document.querySelector("#logoutBtn").style.display = "none";
+    }
+  });
+
+  document
+    .querySelector("#sendMsg")
+    .addEventListener("click", () => writeMessage(document.querySelector("#newMessage").value));
 }
 
 function writeMessage(message) {
 
   // Meter nuevo mensaje
-  database.ref('messages/' + ultimo).update({
-    timestamp: new Date.now(),
+  database.ref('messages/' + next).update({
+    timestamp: Date.now(),
     text: message
   });
 }
 
+function login() {
+  provider = new firebase.auth.GoogleAuthProvider();
+  auth = firebase.auth();
+
+  // Controlar el acceso a la parte privada
+  auth.signInWithPopup(provider)
+    .then((result) => {
+      let credential = result.credential;
+
+      // This gives you a Google Access Token. You can use it to access the Google API.
+      let token = credential.accessToken;
+
+      // The signed-in user info.
+      let user = result.user;
+
+      logged = true;
+
+      document.querySelector("#writeMessagesBox").style.display = "block";
+      document.querySelector("#loginBtn").style.display = "none";
+      document.querySelector("#logoutBtn").style.display = "block";
+    })
+    .catch((error) => {
+      // Handle Errors here.
+      let errorCode = error.code;
+      let errorMessage = error.message;
+      // The email of the user's account used.
+      let email = error.email;
+      // The firebase.auth.AuthCredential type that was used.
+      let credential = error.credential;
+      // ...
+
+      console.log(error.message);
+    });
+}
+
 document
-  .querySelector("#readBtn")
-  .addEventListener("click", readMessages)
+  .querySelector("#loginBtn")
+  .addEventListener("click", login);
+
+init();
