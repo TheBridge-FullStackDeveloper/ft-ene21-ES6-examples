@@ -74,22 +74,20 @@ async function init() {
 
   getMovies();
 }
-
 init();
 
+// ----------- How to fetch... -----------
 
-
-// ES6 (2015)
-function getUser() {
-  fetch('...')
+// ... without async/await, ES6 (2015) version
+function fetchCharactersPromise() {
+  fetch('https://futuramaapi.herokuapp.com/api/v2/characters')
     .then(response => response.json())
-    .then(user => { ... })
+    .then(data => console.log(data));
 }
 
-// ES8 (2017)
-async function getUser() {
-  let response = await fetch('...');
-  let user = await response.json();
-
-  user
+// ... without async/await, ES8 (2017) version
+async function fetchCharactersAsyncAwait() {
+  let response = await fetch('https://futuramaapi.herokuapp.com/api/v2/characters');
+  let data = await response.json();
+  console.log(data);
 }
